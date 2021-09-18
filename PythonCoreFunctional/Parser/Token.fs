@@ -42,8 +42,53 @@ type Token =
     |   While of uint32 * uint32 * Trivia
     |   With of uint32 * uint32 * Trivia
     |   Yield of uint32 * uint32 * Trivia
-
-
+    |   Plus of uint32 * uint32 * Trivia
+    |   Minus of uint32 * uint32 * Trivia
+    |   Mul of uint32 * uint32 * Trivia
+    |   Power of uint32 * uint32 * Trivia
+    |   Div of uint32 * uint32 * Trivia
+    |   FloorDiv of uint32 * uint32 * Trivia
+    |   Modulo of uint32 * uint32 * Trivia
+    |   Matrice of uint32 * uint32 * Trivia
+    |   ShiftLeft of uint32 * uint32 * Trivia
+    |   ShiftRight of uint32 * uint32 * Trivia
+    |   BitAnd of uint32 * uint32 * Trivia
+    |   BitOr of uint32 * uint32 * Trivia
+    |   BitXor of uint32 * uint32 * Trivia
+    |   BitInvert of uint32 * uint32 * Trivia
+    |   Less of uint32 * uint32 * Trivia
+    |   Greater of uint32 * uint32 * Trivia
+    |   LessEqual of uint32 * uint32 * Trivia
+    |   GreaterEqual of uint32 * uint32 * Trivia
+    |   Equal of uint32 * uint32 * Trivia
+    |   NotEqual of uint32 * uint32 * Trivia
+    |   LeftParen of uint32 * uint32 * Trivia
+    |   RightParen of uint32 * uint32 * Trivia
+    |   LeftBracket of uint32 * uint32 * Trivia
+    |   RightBracket of uint32 * uint32 * Trivia
+    |   LeftCurly of uint32 * uint32 * Trivia
+    |   RightCurly of uint32 * uint32 * Trivia
+    |   Comma of uint32 * uint32 * Trivia
+    |   Colon of uint32 * uint32 * Trivia
+    |   ColonAssign of uint32 * uint32 * Trivia
+    |   Dot of uint32 * uint32 * Trivia
+    |   Elipsis of uint32 * uint32 * Trivia
+    |   SemiColon of uint32 * uint32 * Trivia
+    |   Assign of uint32 * uint32 * Trivia
+    |   Arrow of uint32 * uint32 * Trivia
+    |   PlusAssign of uint32 * uint32 * Trivia
+    |   MinusAssign of uint32 * uint32 * Trivia
+    |   MulAssign of uint32 * uint32 * Trivia
+    |   PowerAssign of uint32 * uint32 * Trivia
+    |   DivAssign of uint32 * uint32 * Trivia
+    |   FloorDivAssign of uint32 * uint32 * Trivia
+    |   ModuloAssign of uint32 * uint32 * Trivia
+    |   BitAndAssign of uint32 * uint32 * Trivia
+    |   BitOrAssign of uint32 * uint32 * Trivia
+    |   BitXorAssign of uint32 * uint32 * Trivia
+    |   MatriceAssign of uint32 * uint32 * Trivia
+    |   ShiftLeftAssign of uint32 * uint32 * Trivia
+    |   ShiftRightAssign of uint32 * uint32 * Trivia
     |   Name of uint32 * uint32 * Trivia * string
     |   Number of uint32 * uint32 * Trivia * string
     |   String of uint32 * uint32 * Trivia * string array
