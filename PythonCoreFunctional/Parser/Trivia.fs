@@ -1,6 +1,5 @@
 
-namespace PythonCore.Runtime.Parser;
+namespace PythonCore.Runtime.Parser
 
 type Trivia = 
     |   Empty
-    
