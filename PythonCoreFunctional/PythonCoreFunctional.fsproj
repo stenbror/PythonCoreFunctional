@@ -9,6 +9,8 @@
     <Compile Include="Library.fs" />
     <Compile Include="Parser/Trivia.fs" />
     <Compile Include="Parser/Token.fs" />
+    <Compile Include="Parser/Node.fs" />
+    <Compile Include="Parser/Errors.fs" />
   </ItemGroup>
 
 </Project>
