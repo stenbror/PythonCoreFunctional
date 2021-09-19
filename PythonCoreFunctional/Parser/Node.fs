@@ -37,5 +37,22 @@ type Node =
     |   BitInvert of uint32 * uint32 * Token * Node
     |   Power of uint32 * uint32 * Node * Token * Node 
     |   AtomExpr of uint32 * uint32 * Token * Node * Node array
-    
+    |   Tuple of uint32 * uint32 * Token * Node * Token
+    |   List of uint32 * uint32 * Token * Node * Token
+    |   Dictionary of uint32 * uint32 * Token * Node * Token
+    |   Set of uint32 * uint32 * Token * Node * Token
+    |   Name of uint32 * uint32 * Token
+    |   Number of uint32 * uint32 * Token
+    |   String of uint32 * uint32 * Token array
+    |   Elipsis of uint32 * uint32 * Token
+    |   None of uint32 * uint32 * Token
+    |   True of uint32 * uint32 * Token
+    |   False of uint32 * uint32 * Token
+    |   TestListComp of uint32 * uint32 * Node array * Token array
+    |   Call of uint32 * uint32 * Token * Node * Token
+    |   Index of uint32 * uint32 * Token * Node * Token
+    |   DotName of uint32 * uint32 * Token * Token
+    |   SubscriptList of uint32 * uint32 * Node array * Token array
+    |   Subscript of uint32 * uint32 * Node * Token * Node * Token * Node
+
     
