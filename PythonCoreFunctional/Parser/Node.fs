@@ -19,5 +19,23 @@ type Node =
     |   NotIn of uint32 * uint32 * Node * Token * Node 
     |   Is of uint32 * uint32 * Node * Token * Node 
     |   IsNot of uint32 * uint32 * Node * Token * Node 
+    |   StarExpr of uint32 * uint32 * Token * Node
+    |   OrExpr of uint32 * uint32 * Node * Token * Node 
+    |   XorExpr of uint32 * uint32 * Node * Token * Node 
+    |   AndExpr of uint32 * uint32 * Node * Token * Node 
+    |   ShiftLeft of uint32 * uint32 * Node * Token * Node 
+    |   ShiftRight of uint32 * uint32 * Node * Token * Node 
+    |   Plus of uint32 * uint32 * Node * Token * Node 
+    |   Minus of uint32 * uint32 * Node * Token * Node 
+    |   Mul of uint32 * uint32 * Node * Token * Node 
+    |   Matrice of uint32 * uint32 * Node * Token * Node 
+    |   Modulo of uint32 * uint32 * Node * Token * Node 
+    |   Div of uint32 * uint32 * Node * Token * Node 
+    |   FloorDiv of uint32 * uint32 * Node * Token * Node 
+    |   UnaryPlus of uint32 * uint32 * Token * Node
+    |   UnaryMinus of uint32 * uint32 * Token * Node
+    |   BitInvert of uint32 * uint32 * Token * Node
+    |   Power of uint32 * uint32 * Node * Token * Node 
+    |   AtomExpr of uint32 * uint32 * Token * Node * Node array
     
     
