@@ -109,7 +109,21 @@ type Node =
     |   With of uint32 * uint32 * Node array * Token array * Token * Token * Node
     |   Suite of uint32 * uint32 * Token * Token * Node array * Token
     |   Class of uint32 * uint32 * Token * Token * Token * Node * Token * Token * Node
-    
-
-
-    
+    |   SingleInput of uint32 * uint32 * Node * Token
+    |   FileInput of uint32 * uint32 * Token array * Node array * Token
+    |   EvalInput of uint32 * uint32 * Node * Token array * Token
+    |   Decorator of uint32 * uint32 * Token * Node * Token * Node * Token * Token
+    |   Decorators of uint32 * uint32 * Node array
+    |   Decorated of uint32 * uint32 * Node * Node
+    |   AsyncFuncDef of uint32 * uint32 * Token * Node
+    |   FuncDef of uint32 * uint32 * Token * Token * Node * Token * Token * Token * Token * Node
+    |   Parameters of uint32 * uint32 * Token * Node * Token
+    |   TypedArgsList of uint32 * uint32 * Node array * Token array * Token array * Token * Node * Token * Node
+    |   TfpDefAssign of uint32 * uint32 * Node * Token * Node
+    |   TfpDef of uint32 * uint32 * Token *Token * Node
+    |   VarArgsList of uint32 * uint32 * Node array * Token array * Token * Token * Token * Token
+    |   VfpDefAssign of uint32 * uint32 * Token * Token * Node
+    |   FuncBodySuite of uint32 * uint32 * Token * Token * Token * Token * Node array * Token
+    |   FuncTypeInput of uint32 * uint32 * Node * Token array * Token
+    |   FuncType of uint32 * uint32 * Token * Node * Token * Token * Node
+    |   TypeList of uint32 * uint32 * Node array * Token array * Token * Node * Token * Node
