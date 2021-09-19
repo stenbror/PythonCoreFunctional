@@ -552,3 +552,292 @@ module Tokenizer =
                 Some(Token.String(_TokenStartPos, (uint32)state.Index, trivia, text))
         | _ ->
                 Option.None
+
+    and KeywordOrNameLiteral (state : byref<TokenizerState>) : Token option =
+        let _TokenStartPos = state.TokenStartPos
+        
+        match   IsStartLetter (match PeekChar(&state, 0) with | Some(x) -> x | _ -> ' ') with
+        | true ->
+        
+                while IsLetterOrDigit (match PeekChar(&state, 0) with | Some(x) -> x | _ -> ' ') do
+                        state.Index <- state.Index + 1
+                        
+                let text = System.String(state.SourceCode.[(int32)_TokenStartPos..state.Index - 1])
+                        
+                if Keywords.ContainsKey text then
+                        
+                        let trivia = TriviaKeeping(&state, 0)
+                        Some(Keywords.[text](_TokenStartPos, (uint32)state.Index, trivia))
+                else
+                        match PeekChar(&state, 0) with
+                        | Some(x) when x = '\'' || x = '"' ->
+                                match text with
+                                | "r"
+                                | "u"
+                                | "R"
+                                | "U"
+                                | "f"
+                                | "F"
+                                | "fr"
+                                | "Fr"
+                                | "fR"
+                                | "FR"
+                                | "rf"
+                                | "rF"
+                                | "Rf"
+                                | "RF" ->
+                                        StringLiteral(&state, _TokenStartPos)
+                                | _ ->
+                                      let trivia = TriviaKeeping(&state, 0)
+                                      Some(Token.Name(_TokenStartPos, (uint32)state.Index, trivia, text))
+                        | _ ->    
+                                let trivia = TriviaKeeping(&state, 0)
+                                Some(Token.Name(_TokenStartPos, (uint32)state.Index, trivia, text))
+        | _ ->
+                Option.None
+
+    and TypeCommentOrComment (state : byref<TokenizerState>) : Token option =
+        let _TokenStartPos = state.TokenStartPos
+        match PeekChar(&state, 0) with
+        |    Some(x) ->
+                match x with
+                | '#' ->
+                        state.Index <- state.Index + 1
+                        while   match PeekChar(&state, 0) with
+                                | Some( x ) when x <> '\r' && x <> '\n'  ->
+                                        state.Index <- state.Index + 1
+                                        true
+                                | Some(_) -> false
+                                | Option.None -> false
+                                do ()
+                        let text = System.String(state.SourceCode.[(int32)_TokenStartPos..state.Index - 1])
+                        if text.StartsWith("# type: ") then
+                             let trivia = TriviaKeeping(&state, 0)
+                             Some(Token.TypeComment(_TokenStartPos, (uint32)state.Index, trivia, text))
+                        else
+                             state.TriviaList <- Trivia.Comment(_TokenStartPos, (uint32)state.Index, text) :: state.TriviaList
+                             Some(InnerLoop(&state)) // Recursive call innerloop again!
+                |   _ -> Option.None
+        |   _ ->
+                Option.None
+
+    and NewlineHandling (state : byref<TokenizerState>) : Token option =
+         let _TokenStartPos = state.TokenStartPos
+         match PeekChar(&state, 0) with
+         | Some(x) when x = '\r' || x = '\n' ->
+                 match PeekChar(&state, 0), PeekChar(&state, 1) with
+                 |  Some(x), Some(y) ->
+                        match x, y with
+                        | '\r', '\n' ->     state.Index <- state.Index + 2l
+                        | '\r', _ ->        state.Index <- state.Index + 1l
+                        | '\n', _ ->        state.Index <- state.Index + 1l
+                        | _ -> ()
+                        state.AtBOL <- true
+                        if state.IsBlankLine || state.LevelStack.IEmpty = false then
+                              state.TriviaList <- Trivia.Newline(_TokenStartPos, (uint32)state.Index, x, y) :: state.TriviaList
+                              Some(OuterLoop(&state)) // Recursive call outerloop again!
+                        else
+                              let trivia = TriviaKeeping(&state, 0)
+                              Some(Token.Newline(_TokenStartPos, (uint32)state.Index, x, y, trivia))
+                 |  Some(x), _ ->
+                         match x with
+                         | '\r' | '\n' ->
+                                 state.Index <- state.Index + 1l
+                                 if state.IsBlankLine || not state.LevelStack.IEmpty then
+                                      state.TriviaList <- Trivia.Newline(_TokenStartPos, (uint32)state.Index, x, ' ') :: state.TriviaList
+                                      Some(OuterLoop(&state)) // Recursive call outerloop again!
+                                 else
+                                      let trivia = TriviaKeeping(&state, 0)
+                                      Some(Token.Newline(_TokenStartPos, (uint32)state.Index, x, ' ', trivia))
+                         | _ ->  Option.None
+                 | _ ->
+                        Option.None
+         | _ ->
+                 Option.None
+                
+    and EndOfFileHandling (state : byref<TokenizerState>) : Token option =
+         match PeekChar(&state, 0) with
+         | Option.None ->
+                 if state.IsInteractiveMode && not state.IsDone then raise (InteractiveNeedMoreInput)
+                 let trivia = TriviaKeeping(&state, 0)
+                 Some(Token.Eof((uint32)state.Index, trivia))
+         | _ -> Option.None
+         
+    and WhiteSpaceHandling (state : byref<TokenizerState>) : Token option =
+         let _TokenStartPos = state.TokenStartPos
+         match PeekChar(&state, 0) with
+         | Some(x) when x = ' ' || x = '\t' ->
+                 while match PeekChar(&state, 0) with
+                       | Some(x) when x = ' ' ->
+                               state.TriviaList <- Trivia.WhiteSpace(_TokenStartPos, (uint32)state.Index) :: state.TriviaList
+                               state.Index <- state.Index + 1
+                               true
+                        | Some(x) when x = '\t' ->
+                                state.TriviaList <- Trivia.Tabulator(_TokenStartPos, (uint32)state.Index) :: state.TriviaList
+                                state.Index <- state.Index + 1
+                                true
+                       | Some(_) -> false
+                       | _ -> false
+                       do ()
+                 
+                 state.TokenStartPos <- (uint32)state.Index
+                 Some(InnerLoop(&state)) // Recursive call innerloop again!
+         | _ ->
+                 Option.None
+         
+    and LineContinuationHandling (state : byref<TokenizerState>) : Token Option =
+         let _TokenStartPos = state.TokenStartPos
+         match PeekChar(&state, 0) with
+         | Some(x) ->
+                 match x with
+                 | '\\' ->
+                      state.Index <- state.Index + 1
+                      match PeekChar(&state, 0), PeekChar(&state, 1) with
+                      | Some(y), Some(z) ->
+                            match y, z with
+                            | '\r', '\n'
+                            | '\r', _
+                            | '\n', _ ->
+                                  if z = '\n' then state.Index <- state.Index + 1
+                                  state.Index <- state.Index + 1
+                                  state.TriviaList <- Trivia.LineContinuation(_TokenStartPos, (uint32)state.Index, '\\', y, z) :: state.TriviaList
+                                  state.TokenStartPos <- (uint32)state.Index
+                                  Some(InnerLoop(&state)) // Recursive call innerloop again!
+                            | _ ->
+                                  raise (LexicalError("Expecting newline after line continuation character '\\'!", (uint32)state.Index ))
+                      | Some(x), Option.None ->
+                            match x with
+                            | '\r' | '\n' ->
+                                  state.Index <- state.Index + 1
+                                  state.TriviaList <- Trivia.LineContinuation(_TokenStartPos, (uint32)state.Index, '\\', x, ' ') :: state.TriviaList  
+                                  state.TokenStartPos <- (uint32)state.Index
+                                  Some(InnerLoop(&state)) // Recursive call innerloop again!
+                            | _ ->
+                                  raise (LexicalError("Expecting newline after line continuation character '\\'!", (uint32)state.Index ))
+                      | _ ->
+                            Option.None
+                 | _ ->
+                      Option.None
+         | _ ->
+                Option.None
+               
+    and PendingIndentationLevel (state : byref<TokenizerState>) : Token option =
+         state.TokenStartPos <- (uint32)state.Index
+         match state.Pending with
+         |  _ when state.Pending < 0 ->
+                state.Pending <- state.Pending + 1
+                Some(Token.Dedent)
+         |  _ when state.Pending > 0 ->
+                state.Pending <- state.Pending - 1
+                Some(Token.Indent)
+         |  _ ->
+                Option.None
+                
+    and AnalyzeIndentationLevel (state : byref<TokenizerState>) =
+          match state.AtBOL with
+          | true ->
+                 state.AtBOL <- false
+                 let mutable col = 0ul
+                 
+                 while  match PeekChar(&state, 0) with
+                        | Some(' ') ->
+                                col <- col + 1ul
+                                true
+                        | Some('\t') ->
+                                col <- (col / state.TabSize + 1ul) *state.TabSize
+                                true
+                        | Some('\f') ->
+                                col <- 0ul
+                                true
+                        | _ -> false
+                        do
+                                GetChar(&state) |> ignore
+                 
+                 match PeekChar(&state, 0) with
+                 | Some('#')
+                 | Some('\r')
+                 | Some('\n')
+                 | Some('\\') ->
+                         if col = 0ul && state.IsInteractiveMode then
+                              match PeekChar(&state, 0) with
+                              | Some('\r')
+                              | Some('\n') ->
+                                   state.IsBlankLine <- false
+                              | _ ->
+                                   ()
+                         elif state.IsInteractiveMode then
+                              state.IsBlankLine <- false
+                              col <- 0ul
+                         else
+                              state.IsBlankLine <- true
+                 | _ ->  ()
+                 
+                 if state.IsBlankLine = false && state.LevelStack.IEmpty then
+                      if col = state.IndentStack.[(int32)state.IndentLevel] then
+                          () // No change in indentation level
+                      elif col > state.IndentStack.[(int32)state.IndentLevel] then
+                          if state.IndentLevel >= 99ul then
+                               raise (LexicalError("Maximum 100 level of indentation allowed!", (uint32)state.Index))
+                          state.IndentLevel <- state.IndentLevel + 1ul
+                          state.IndentStack.[(int32)state.IndentLevel] <- col
+                          state.Pending <- state.Pending + 1l
+                      else
+                           while state.IndentLevel > 0ul && col < state.IndentStack.[(int32)state.IndentLevel] do
+                                state.IndentLevel <- state.IndentLevel - 1ul
+                                state.Pending <- state.Pending - 1l
+                           if col <> state.IndentStack.[(int32)state.IndentLevel] then
+                                raise (LexicalError("Inconsistant indenation level!", (uint32)state.Index))
+          | _ ->
+                ()
+                        
+    and InnerLoop (state : byref<TokenizerState>) =
+        match WhiteSpaceHandling(&state) with
+        | Some(x) -> x
+        | _ ->
+             match TypeCommentOrComment(&state) with
+             | Some(x) -> x
+             | _ ->
+                 match EndOfFileHandling(&state) with
+                 | Some(x) -> x
+                 | _ ->
+                        match KeywordOrNameLiteral(&state) with
+                        | Some(x) -> x
+                        | _ ->
+                                match NewlineHandling(&state) with
+                                | Some(x) -> x
+                                | _ ->
+                                        match NumberLiteral(&state) with
+                                        | Some(x) -> x
+                                        | _ ->
+                                                match StringLiteral(&state, (uint32)state.Index) with
+                                                | Some(x) -> x
+                                                | _ ->
+                                                        match LineContinuationHandling(&state) with
+                                                        | Some(x) -> x
+                                                        | _ ->
+                                                                match OperatorOrDelimiters(&state) with
+                                                                | Some(x) -> x
+                                                                | _ ->
+                                                                        raise (LexicalError("Expected a valid Token!", (uint32)state.Index))
+    
+    and OuterLoop (state : byref<TokenizerState>) =
+        AnalyzeIndentationLevel(&state)
+        match PendingIndentationLevel(&state) with
+        | Some(x) -> x
+        | _ ->
+                InnerLoop(&state)
+                
+    and TokenizeFromCharArray (text : char array) : TokenStream =
+       let mutable state = TokenizerState.Init text
+       let mutable tokenStream : Token list = []
+       
+       while    match OuterLoop(&state) with
+                | Token.Eof(_) as x ->
+                        tokenStream <- x :: tokenStream
+                        false
+                | x ->
+                        tokenStream <- x :: tokenStream
+                        true
+           do ()
+       
+       List.rev tokenStream

@@ -5,8 +5,8 @@ type Token =
     |   Empty
     |   Eof of uint32 * Trivia array
     |   Newline of uint32 * uint32 * char * char * Trivia array
-    |   Indent of uint32
-    |   Dedent of uint32
+    |   Indent
+    |   Dedent
     |   False of uint32 * uint32 * Trivia array
     |   None of uint32 * uint32 * Trivia array
     |   True of uint32 * uint32 * Trivia array
@@ -89,11 +89,11 @@ type Token =
     |   MatriceAssign of uint32 * uint32 * Trivia array
     |   ShiftLeftAssign of uint32 * uint32 * Trivia array
     |   ShiftRightAssign of uint32 * uint32 * Trivia array
-    |   Name of uint32 * uint32 * Trivia array * string array
+    |   Name of uint32 * uint32 * Trivia array * string
     |   Number of uint32 * uint32 * Trivia array * string
     |   String of uint32 * uint32 * Trivia array * string
     |   Match of uint32 * uint32 * Trivia array // Positional keyword / Tokenizer gives a Name token, but parser replaces it with this if rule matches.
     |   Case of uint32 * uint32 * Trivia array // Positional keyword / Tokenizer gives a Name token, but parser replaces it with this if rule matches.
     |   MatchAllPattern of uint32 * uint32 * Trivia array // Positional keyword / Tokenizer gives a Name token, but parser replaces it with this if rule matches.
-
+    |   TypeComment of uint32 * uint32 * Trivia array * string
 type TokenStream = Token list
