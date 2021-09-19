@@ -91,7 +91,7 @@ type Token =
     |   ShiftRightAssign of uint32 * uint32 * Trivia array
     |   Name of uint32 * uint32 * Trivia array * string array
     |   Number of uint32 * uint32 * Trivia array * string
-    |   String of uint32 * uint32 * Trivia array * string array
+    |   String of uint32 * uint32 * Trivia array * string
     |   Match of uint32 * uint32 * Trivia array // Positional keyword / Tokenizer gives a Name token, but parser replaces it with this if rule matches.
     |   Case of uint32 * uint32 * Trivia array // Positional keyword / Tokenizer gives a Name token, but parser replaces it with this if rule matches.
     |   MatchAllPattern of uint32 * uint32 * Trivia array // Positional keyword / Tokenizer gives a Name token, but parser replaces it with this if rule matches.

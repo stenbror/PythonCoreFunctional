@@ -510,4 +510,45 @@ module Tokenizer =
         |  _ ->
                 Option.None
 
-    
+    and StringLiteral (state : byref<TokenizerState>, tokenStart : uint32) : Token option =
+        let _TokenStartPos = tokenStart
+        match PeekChar(&state, 0) with
+        | Some(x1) when x1 = '\'' || x1 = '"' ->
+                let x2 = match PeekChar(&state, 1) with | Some(x2) -> x2 | _ -> (char)0x00
+                let x3 = match PeekChar(&state, 2) with | Some(x2) -> x2 | _ -> (char)0x00
+                let isTriple = (x1 = x2) && (x2 = x3)
+                let isEmpty = (x1 = x2) && not isTriple
+                
+                if isEmpty then
+                     state.Index <- state.Index + 2
+                else
+                     if isTriple then
+                          state.Index <- state.Index + 3
+                     else
+                          state.Index <- state.Index + 1
+                     
+                     while  match PeekChar(&state, 0) with
+                            | Some(x4) when x4 <> x1 ->
+                                    state.Index <- state.Index + 1
+                                    true
+                            | Some(x4) ->
+                                    if isTriple then
+                                        let x5 = match PeekChar(&state, 1) with | Some(x2) -> x2 | _ -> (char)0x00
+                                        let x6 = match PeekChar(&state, 2) with | Some(x2) -> x2 | _ -> (char)0x00
+                                        if (x4 = x5) && (x5 = x6) then
+                                             state.Index <- state.Index + 3
+                                             false
+                                        else
+                                             state.Index <- state.Index + 1
+                                             true
+                                    else
+                                        state.Index <- state.Index + 1
+                                        false 
+                            | Option.None ->  false
+                        do ()
+                     
+                let text = System.String(state.SourceCode.[(int32)_TokenStartPos..state.Index - 1])
+                let trivia = TriviaKeeping(&state, 0)
+                Some(Token.String(_TokenStartPos, (uint32)state.Index, trivia, text))
+        | _ ->
+                Option.None
