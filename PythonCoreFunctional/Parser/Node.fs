@@ -39,8 +39,8 @@ type Node =
     |   AtomExpr of uint32 * uint32 * Token * Node * Node array
     |   Tuple of uint32 * uint32 * Token * Node * Token
     |   List of uint32 * uint32 * Token * Node * Token
-    |   Dictionary of uint32 * uint32 * Token * Node * Token
-    |   Set of uint32 * uint32 * Token * Node * Token
+    |   Dictionary of uint32 * uint32 * Token * Node array * Token
+    |   Set of uint32 * uint32 * Token * Node array * Token
     |   Name of uint32 * uint32 * Token
     |   Number of uint32 * uint32 * Token
     |   String of uint32 * uint32 * Token array
@@ -54,5 +54,15 @@ type Node =
     |   DotName of uint32 * uint32 * Token * Token
     |   SubscriptList of uint32 * uint32 * Node array * Token array
     |   Subscript of uint32 * uint32 * Node * Token * Node * Token * Node
-
+    |   ExprList of uint32 * uint32 * Node array * Token array
+    |   TestList of uint32 * uint32 * Node array * Token array
+    |   DictionaryItem of uint32 * uint32 * Node * Token * Node
+    |   SetItem of uint32 * uint32 * Node
+    |   ArgList of uint32 * uint32 * Node array * Token array
+    |   Argument of uint32 * uint32 * Node * Token * Node
+    |   SyncCompFor of uint32 * uint32 * Token * Node * Token * Node * Node
+    |   CompFor of uint32 * uint32 * Token * Node
+    |   CompIf of uint32 * uint32 * Token * Node * Node
+    |   Yield of uint32 * uint32 * Token * Node
+    |   YieldFrom of uint32 * uint32 * Token * Token * Node
     
