@@ -2,6 +2,6 @@
 namespace PythonCore.Runtime.Parser
 
 
-exception LexicalError of uint32 * string
+exception LexicalError of string * uint32
 
-exception SyntaxError of uint32 * Token * string
+exception SyntaxError of Token * string * uint32
