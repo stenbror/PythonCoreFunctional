@@ -65,4 +65,21 @@ type Node =
     |   CompIf of uint32 * uint32 * Token * Node * Node
     |   Yield of uint32 * uint32 * Token * Node
     |   YieldFrom of uint32 * uint32 * Token * Token * Node
+    |   SimpleStmt of uint32 * uint32 * Node array * Token array * Token
+    |   PlusAssign of uint32 * uint32 * Node * Token * Node
+    |   MinusAssign of uint32 * uint32 * Node * Token * Node
+    |   MulAssign of uint32 * uint32 * Node * Token * Node
+    |   MatriceAssign of uint32 * uint32 * Node * Token * Node
+    |   DivAssign of uint32 * uint32 * Node * Token * Node
+    |   ModuloAssign of uint32 * uint32 * Node * Token * Node
+    |   BitAndAssign of uint32 * uint32 * Node * Token * Node
+    |   BitOrAssign of uint32 * uint32 * Node * Token * Node
+    |   BitXorAssign of uint32 * uint32 * Node * Token * Node
+    |   ShiftLeftAssign of uint32 * uint32 * Node * Token * Node
+    |   ShiftRightAssign of uint32 * uint32 * Node * Token * Node
+    |   PowerAssign of uint32 * uint32 * Node * Token * Node
+    |   FloorDivAssign of uint32 * uint32 * Node * Token * Node
+    |   AnnAssign of uint32 * uint32 * Node * Token * Node * Token * Node
+    |   ExprStmt of uint32 * uint32 * Node * Token array * Node array * Token
+    |   TestListStarExpr of uint32 * uint32 * Node array * Token array
     
