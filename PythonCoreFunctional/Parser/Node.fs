@@ -82,4 +82,21 @@ type Node =
     |   AnnAssign of uint32 * uint32 * Node * Token * Node * Token * Node
     |   ExprStmt of uint32 * uint32 * Node * Token array * Node array * Token
     |   TestListStarExpr of uint32 * uint32 * Node array * Token array
+    |   Del of uint32 * uint32 * Token * Node
+    |   Pass of uint32 * uint32 * Token
+    |   Break of uint32 * uint32 * Token
+    |   Continue of uint32 * uint32 * Token
+    |   Return of uint32 * uint32 * Token * Node
+    |   Raise of uint32 * uint32 * Token * Node * Token * Node
+    |   ImportName of uint32 * uint32 * Token * Node
+    |   ImportFrom of uint32 * uint32 * Token * Token array * Node * Token * Token * Node * Token
+    |   ImportAsName of uint32 * uint32 * Token * Token * Token
+    |   DottedAsName of uint32 * uint32 * Node * Token * Token
+    |   ImportAsNames of uint32 * uint32 * Node array * Token array
+    |   DottedAsNames of uint32 * uint32 * Node array * Token array
+    |   DottedName of uint32 * uint32 * Token array * Token array
+    |   Global of uint32 * uint32 * Token * Token array * Token array
+    |   NonLocal of uint32 * uint32 * Token * Token array * Token array
+    |   Assert of uint32 * uint32 * Token * Token * Token * Token
+    
     
