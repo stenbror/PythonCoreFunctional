@@ -98,5 +98,18 @@ type Node =
     |   Global of uint32 * uint32 * Token * Token array * Token array
     |   NonLocal of uint32 * uint32 * Token * Token array * Token array
     |   Assert of uint32 * uint32 * Token * Token * Token * Token
+    |   Async of uint32 * uint32 * Token * Node
+    |   If of uint32 * uint32 * Token * Node * Token * Node * Node array * Node
+    |   Elif of uint32 * uint32 * Token * Node * Token * Node
+    |   Else of uint32 * uint32 * Token * Token * Node
+    |   While of uint32 * uint32 * Token * Node * Token * Node * Node
+    |   Try of uint32 * uint32 * Token * Token * Node * Node array * Node * Token * Token * Node
+    |   Except of uint32 * uint32 * Token * Node * Token * Token * Token * Node
+    |   WithItem of uint32 * uint32 * Node * Token * Node
+    |   With of uint32 * uint32 * Node array * Token array * Token * Token * Node
+    |   Suite of uint32 * uint32 * Token * Token * Node array * Token
+    |   Class of uint32 * uint32 * Token * Token * Token * Node * Token * Token * Node
     
+
+
     
