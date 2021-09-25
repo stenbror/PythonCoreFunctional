@@ -96,4 +96,5 @@ type Token =
     |   Case of uint32 * uint32 * Trivia array // Positional keyword / Tokenizer gives a Name token, but parser replaces it with this if rule matches.
     |   MatchAllPattern of uint32 * uint32 * Trivia array // Positional keyword / Tokenizer gives a Name token, but parser replaces it with this if rule matches.
     |   TypeComment of uint32 * uint32 * Trivia array * string
+    
 type TokenStream = Token list
