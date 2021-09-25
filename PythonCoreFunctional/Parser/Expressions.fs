@@ -109,5 +109,25 @@ module Expressions =
         |   _ ->    0u
 
 
-    let rec ParseAtom (stream: TokenStream, state: byref<ParseState>) : Node = 
-        Node.Empty
+    let rec ParseAtom (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+        let spanStart = GetStartPosition stream
+        match TryToken stream with
+        |   Some(Token.Name(_ , _ , _ , _), rest)  ->
+                let op = List.head stream
+                (Node.Name(spanStart, GetStartPosition rest, op), rest)
+        |   Some(Token.Number(_ , _ , _ , _), rest)  ->
+                let op = List.head stream
+                (Node.Number(spanStart, GetStartPosition rest, op), rest)
+        |   Some(Token.String(_ , _ , _ , _), rest)    ->
+                let mutable restAgain = stream
+                let mutable nodes : Token list = []
+                while   match TryToken restAgain with
+                        |    Some(Token.String(_ , _ , _ , _), restNow) ->
+                                nodes <- List.head restAgain :: nodes
+                                restAgain <- restNow
+                                true
+                        |   _ ->    false
+                    do ()
+                (Node.String(spanStart, GetStartPosition restAgain, List.toArray(List.rev nodes)), restAgain)
+        |   _ -> 
+            raise (SyntaxError(List.head stream, "Illegal literal!", spanStart))
