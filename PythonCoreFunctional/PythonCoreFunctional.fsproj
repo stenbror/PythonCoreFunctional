@@ -12,6 +12,8 @@
     <Compile Include="Parser/Node.fs" />
     <Compile Include="Parser/Errors.fs" />
     <Compile Include="Parser/Tokenizer.fs" />
+    <Compile Include="Parser/Parser.fs" />
+    <Compile Include="Parser/Expressions.fs" />
   </ItemGroup>
 
 </Project>
