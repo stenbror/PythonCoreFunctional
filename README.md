@@ -5,3 +5,7 @@ This is another project of mine to produce a Python parser that is written in a 
 I am trying to build this parser a little like the Roslyn C# compiler from Microsoft with Nodes, Tokens and Trivias. The idea is to be able to refactor Python code in your own program by using this as a framework for Python.
 
 I have written a lot of different Python Parsers through the times after my master thesis which was Python in C++. This will be the final version, i prommise and it will be in fsharp and dot net only, but i am developing on a Linux Server and Mac M1 notebook, so i am designing it to be multi platform.
+
+To build project, just type: dotnet build
+
+To test project, just type: dotnet test
