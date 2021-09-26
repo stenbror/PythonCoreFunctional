@@ -669,12 +669,12 @@ module Tokenizer =
          | Some(x) when x = ' ' || x = '\t' ->
                  while match PeekChar(&state, 0) with
                        | Some(x) when x = ' ' ->
-                               state.TriviaList <- Trivia.WhiteSpace(_TokenStartPos, (uint32)state.Index) :: state.TriviaList
                                state.Index <- state.Index + 1
+                               state.TriviaList <- Trivia.WhiteSpace(_TokenStartPos, (uint32)state.Index) :: state.TriviaList
                                true
                         | Some(x) when x = '\t' ->
-                                state.TriviaList <- Trivia.Tabulator(_TokenStartPos, (uint32)state.Index) :: state.TriviaList
                                 state.Index <- state.Index + 1
+                                state.TriviaList <- Trivia.Tabulator(_TokenStartPos, (uint32)state.Index) :: state.TriviaList
                                 true
                        | Some(_) -> false
                        | _ -> false
