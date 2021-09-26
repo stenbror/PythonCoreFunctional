@@ -109,7 +109,7 @@ module Expressions =
         |   _ ->    0u
 
 
-    let rec ParseAtom (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+    let ParseAtom (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
         let spanStart = GetStartPosition stream
         match TryToken stream with
         |   Some(Token.Name(_ , _ , _ , _), rest)  ->
@@ -119,8 +119,9 @@ module Expressions =
                 let op = List.head stream
                 (Node.Number(spanStart, GetStartPosition rest, op), rest)
         |   Some(Token.String(_ , _ , _ , _), rest)    ->
-                let mutable restAgain = stream
+                let mutable restAgain = rest
                 let mutable nodes : Token list = []
+                nodes <- List.head stream :: nodes
                 while   match TryToken restAgain with
                         |    Some(Token.String(_ , _ , _ , _), restNow) ->
                                 nodes <- List.head restAgain :: nodes
@@ -129,5 +130,17 @@ module Expressions =
                         |   _ ->    false
                     do ()
                 (Node.String(spanStart, GetStartPosition restAgain, List.toArray(List.rev nodes)), restAgain)
+        |   Some(Token.None(_ , _ , _), rest)   ->
+                let op = List.head stream
+                (Node.None(spanStart, GetStartPosition rest, op), rest)
+        |   Some(Token.True(_ , _ , _), rest)   ->
+                let op = List.head stream
+                (Node.True(spanStart, GetStartPosition rest, op), rest)
+        |   Some(Token.False(_ , _ , _), rest)   ->
+                let op = List.head stream
+                (Node.False(spanStart, GetStartPosition rest, op), rest)
+        |   Some(Token.Elipsis(_ , _ , _), rest)   ->
+                let op = List.head stream
+                (Node.Elipsis(spanStart, GetStartPosition rest, op), rest)
         |   _ -> 
             raise (SyntaxError(List.head stream, "Illegal literal!", spanStart))
