@@ -163,3 +163,147 @@ module TestParserExpressionRules =
                             Node.BitInvert(2ul, 5ul, Token.BitInvert(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ), 
                                 Node.Name(4ul, 5ul, Token.Name(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "a") ))
                         ), node)
+
+    [<Fact>]
+    let ``Test term rule without operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "True".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(4ul, [| |]) |], rest)
+        Assert.Equal(Node.True(0ul, 4ul, Token.True(0ul, 4ul, [| |] )), node)
+
+    [<Fact>]
+    let ``Test term rule with single mul operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 * 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal(Node.Mul(0ul, 5ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.Mul(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(4ul, 5ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with multiple mul operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 * 5 * 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(9ul, [| |]) |], rest)
+        Assert.Equal(Node.Mul(0ul, 9ul,
+                            Node.Mul(0ul, 6ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.Mul(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(4ul, 6ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" )) ),
+                            Token.Mul(6ul, 7ul, [| Trivia.WhiteSpace(5ul, 6ul) |] ),
+                            Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with single div operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 / 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal(Node.Div(0ul, 5ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.Div(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(4ul, 5ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with multiple div operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 / 5 / 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(9ul, [| |]) |], rest)
+        Assert.Equal(Node.Div(0ul, 9ul,
+                            Node.Div(0ul, 6ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.Div(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(4ul, 6ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" )) ),
+                            Token.Div(6ul, 7ul, [| Trivia.WhiteSpace(5ul, 6ul) |] ),
+                            Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with single modulo operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 % 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal(Node.Modulo(0ul, 5ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.Modulo(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(4ul, 5ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with multiple modulo operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 % 5 % 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(9ul, [| |]) |], rest)
+        Assert.Equal(Node.Modulo(0ul, 9ul,
+                            Node.Modulo(0ul, 6ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.Modulo(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(4ul, 6ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" )) ),
+                            Token.Modulo(6ul, 7ul, [| Trivia.WhiteSpace(5ul, 6ul) |] ),
+                            Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with single matrice operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 @ 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal(Node.Matrice(0ul, 5ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.Matrice(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(4ul, 5ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with multiple matrice operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 @ 5 @ 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(9ul, [| |]) |], rest)
+        Assert.Equal(Node.Matrice(0ul, 9ul,
+                            Node.Matrice(0ul, 6ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.Matrice(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(4ul, 6ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" )) ),
+                            Token.Matrice(6ul, 7ul, [| Trivia.WhiteSpace(5ul, 6ul) |] ),
+                            Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with single floor div operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 // 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(6ul, [| |]) |], rest)
+        Assert.Equal(Node.FloorDiv(0ul, 6ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.FloorDiv(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(5ul, 6ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test term rule with multiple floor div operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 // 5 // 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseTerm(stream, &state)
+        Assert.Equal([| Token.Eof(11ul, [| |]) |], rest)
+        Assert.Equal(Node.FloorDiv(0ul, 11ul,
+                            Node.FloorDiv(0ul, 7ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.FloorDiv(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(5ul, 7ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" )) ),
+                            Token.FloorDiv(7ul, 9ul, [| Trivia.WhiteSpace(6ul, 7ul) |] ),
+                            Node.Number(10ul, 11ul, Token.Number(10ul, 11ul, [| Trivia.WhiteSpace(9ul, 10ul) |], "6" ))
+                        ), node)
+

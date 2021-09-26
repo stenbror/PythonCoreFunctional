@@ -187,3 +187,41 @@ module Expressions =
                                 Node.BitInvert(spanStart, GetStartPosition rest2, op, right), rest2
                 |       _ ->
                                ParsePower(stream, &state) 
+
+        and ParseTerm (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseFactor(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.Mul(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseFactor(rest2, &state)
+                                        left <- Node.Mul(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.Div(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseFactor(rest2, &state)
+                                        left <- Node.Div(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.FloorDiv(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseFactor(rest2, &state)
+                                        left <- Node.FloorDiv(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.Matrice(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseFactor(rest2, &state)
+                                        left <- Node.Matrice(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.Modulo(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseFactor(rest2, &state)
+                                        left <- Node.Modulo(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       _ -> false
+                        do ()
+                left, rest
