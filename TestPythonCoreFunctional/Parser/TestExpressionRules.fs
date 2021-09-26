@@ -73,3 +73,93 @@ module TestParserExpressionRules =
                             Token.String(0ul, 15ul, [| |], "'Hello, World!'" ) 
                             Token.String(16ul, 22ul, [| Trivia.WhiteSpace(15ul, 16ul) |], "'.txt'" ) 
                         |] ), node)
+
+
+
+
+
+
+    [<Fact>]
+    let ``Test power operator with only left side``() = 
+        let mutable state = ParseState.Init
+        let stream = "True".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParsePower(stream, &state)
+        Assert.Equal([| Token.Eof(4ul, [| |]) |], rest)
+        Assert.Equal(Node.True(0ul, 4ul, Token.True(0ul, 4ul, [| |] )), node)
+
+    [<Fact>]
+    let ``Test power operator``() = 
+        let mutable state = ParseState.Init
+        let stream = "3 ** 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParsePower(stream, &state)
+        Assert.Equal([| Token.Eof(6ul, [| |]) |], rest)
+        Assert.Equal(Node.Power(0ul, 6ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [||], "3")),
+                            Token.Power(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(5ul, 6ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test factor rule without operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "True".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseFactor(stream, &state)
+        Assert.Equal([| Token.Eof(4ul, [| |]) |], rest)
+        Assert.Equal(Node.True(0ul, 4ul, Token.True(0ul, 4ul, [| |] )), node)
+
+    [<Fact>]
+    let ``Test Factor operator, single plus operator``() = 
+        let mutable state = ParseState.Init
+        let stream = "+a".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseFactor(stream, &state)
+        Assert.Equal([| Token.Eof(2ul, [| |]) |], rest)
+        Assert.Equal( Node.UnaryPlus(0ul, 2ul, Token.Plus(0ul, 1ul, [| |]), Node.Name(1ul, 2ul, Token.Name(1ul, 2ul, [| |], "a"))), node)
+
+    [<Fact>]
+    let ``Test Factor operator, multiple plus operator``() = 
+        let mutable state = ParseState.Init
+        let stream = "+ + a".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseFactor(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal( Node.UnaryPlus(0ul, 5ul, Token.Plus(0ul, 1ul, [| |]), 
+                            Node.UnaryPlus(2ul, 5ul, Token.Plus(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ), 
+                                Node.Name(4ul, 5ul, Token.Name(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "a") ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test Factor operator, single minus operator``() = 
+        let mutable state = ParseState.Init
+        let stream = "-a".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseFactor(stream, &state)
+        Assert.Equal([| Token.Eof(2ul, [| |]) |], rest)
+        Assert.Equal( Node.UnaryMinus(0ul, 2ul, Token.Minus(0ul, 1ul, [| |]), Node.Name(1ul, 2ul, Token.Name(1ul, 2ul, [| |], "a"))), node)
+
+    [<Fact>]
+    let ``Test Factor operator, multiple minus operator``() = 
+        let mutable state = ParseState.Init
+        let stream = "- - a".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseFactor(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal( Node.UnaryMinus(0ul, 5ul, Token.Minus(0ul, 1ul, [| |]), 
+                            Node.UnaryMinus(2ul, 5ul, Token.Minus(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ), 
+                                Node.Name(4ul, 5ul, Token.Name(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "a") ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test Factor operator, single invert operator``() = 
+        let mutable state = ParseState.Init
+        let stream = "~a".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseFactor(stream, &state)
+        Assert.Equal([| Token.Eof(2ul, [| |]) |], rest)
+        Assert.Equal( Node.BitInvert(0ul, 2ul, Token.BitInvert(0ul, 1ul, [| |]), Node.Name(1ul, 2ul, Token.Name(1ul, 2ul, [| |], "a"))), node)
+
+    [<Fact>]
+    let ``Test Factor operator, multiple invert operator``() = 
+        let mutable state = ParseState.Init
+        let stream = "~ ~ a".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseFactor(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal( Node.BitInvert(0ul, 5ul, Token.BitInvert(0ul, 1ul, [| |]), 
+                            Node.BitInvert(2ul, 5ul, Token.BitInvert(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ), 
+                                Node.Name(4ul, 5ul, Token.Name(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "a") ))
+                        ), node)
