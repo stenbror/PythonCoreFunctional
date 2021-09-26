@@ -225,3 +225,43 @@ module Expressions =
                         |       _ -> false
                         do ()
                 left, rest
+
+        and ParseArith (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseTerm(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.Plus(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseTerm(rest2, &state)
+                                        left <- Node.Plus(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.Minus(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseTerm(rest2, &state)
+                                        left <- Node.Minus(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       _ ->    false
+                        do ()
+                left, rest
+
+        and ParseShift (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseArith(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.ShiftLeft(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseArith(rest2, &state)
+                                        left <- Node.ShiftLeft(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.ShiftRight(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseArith(rest2, &state)
+                                        left <- Node.ShiftRight(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       _ ->    false
+                        do ()
+                left, rest

@@ -307,3 +307,127 @@ module TestParserExpressionRules =
                             Node.Number(10ul, 11ul, Token.Number(10ul, 11ul, [| Trivia.WhiteSpace(9ul, 10ul) |], "6" ))
                         ), node)
 
+    [<Fact>]
+    let ``Test arith rule without operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "True".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseArith(stream, &state)
+        Assert.Equal([| Token.Eof(4ul, [| |]) |], rest)
+        Assert.Equal(Node.True(0ul, 4ul, Token.True(0ul, 4ul, [| |] )), node)
+
+    [<Fact>]
+    let ``Test arith rule with single plus operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 + 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseArith(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal(Node.Plus(0ul, 5ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.Plus(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(4ul, 5ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test arith rule with multiple plus operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 + 5 + 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseArith(stream, &state)
+        Assert.Equal([| Token.Eof(9ul, [| |]) |], rest)
+        Assert.Equal(Node.Plus(0ul, 9ul,
+                            Node.Plus(0ul, 6ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.Plus(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(4ul, 6ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" )) ),
+                            Token.Plus(6ul, 7ul, [| Trivia.WhiteSpace(5ul, 6ul) |] ),
+                            Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test arith rule with single minus operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 - 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseArith(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal(Node.Minus(0ul, 5ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.Minus(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(4ul, 5ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test arith rule with multiple minus operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 - 5 - 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseArith(stream, &state)
+        Assert.Equal([| Token.Eof(9ul, [| |]) |], rest)
+        Assert.Equal(Node.Minus(0ul, 9ul,
+                            Node.Minus(0ul, 6ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.Minus(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(4ul, 6ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" )) ),
+                            Token.Minus(6ul, 7ul, [| Trivia.WhiteSpace(5ul, 6ul) |] ),
+                            Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test shift rule without operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "True".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseShift(stream, &state)
+        Assert.Equal([| Token.Eof(4ul, [| |]) |], rest)
+        Assert.Equal(Node.True(0ul, 4ul, Token.True(0ul, 4ul, [| |] )), node)
+
+    [<Fact>]
+    let ``Test shift rule with single shift left operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 << 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseShift(stream, &state)
+        Assert.Equal([| Token.Eof(6ul, [| |]) |], rest)
+        Assert.Equal(Node.ShiftLeft(0ul, 6ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.ShiftLeft(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(5ul, 6ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test shift rule with multiple shift left operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 << 5 << 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseShift(stream, &state)
+        Assert.Equal([| Token.Eof(11ul, [| |]) |], rest)
+        Assert.Equal(Node.ShiftLeft(0ul, 11ul,
+                            Node.ShiftLeft(0ul, 7ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.ShiftLeft(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(5ul, 7ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" )) ),
+                            Token.ShiftLeft(7ul, 9ul, [| Trivia.WhiteSpace(6ul, 7ul) |] ),
+                            Node.Number(10ul, 11ul, Token.Number(10ul, 11ul, [| Trivia.WhiteSpace(9ul, 10ul) |], "6" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test shift rule with single shift right operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 >> 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseShift(stream, &state)
+        Assert.Equal([| Token.Eof(6ul, [| |]) |], rest)
+        Assert.Equal(Node.ShiftRight(0ul, 6ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.ShiftRight(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(5ul, 6ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test shift rule with multiple shift right operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 >> 5 >> 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseShift(stream, &state)
+        Assert.Equal([| Token.Eof(11ul, [| |]) |], rest)
+        Assert.Equal(Node.ShiftRight(0ul, 11ul,
+                            Node.ShiftRight(0ul, 7ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.ShiftRight(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(5ul, 7ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" )) ),
+                            Token.ShiftRight(7ul, 9ul, [| Trivia.WhiteSpace(6ul, 7ul) |] ),
+                            Node.Number(10ul, 11ul, Token.Number(10ul, 11ul, [| Trivia.WhiteSpace(9ul, 10ul) |], "6" ))
+                        ), node)
+
