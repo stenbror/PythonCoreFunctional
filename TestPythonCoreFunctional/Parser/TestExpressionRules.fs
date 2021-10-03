@@ -501,9 +501,6 @@ module TestParserExpressionRules =
                             Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
                         ), node)
 
-    
-
-
     [<Fact>]
     let ``Test or rule without operators``() = 
         let mutable state = ParseState.Init
@@ -537,4 +534,15 @@ module TestParserExpressionRules =
                                 Node.Number(4ul, 6ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" )) ),
                             Token.BitOr(6ul, 7ul, [| Trivia.WhiteSpace(5ul, 6ul) |] ),
                             Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test star expression``() = 
+        let mutable state = ParseState.Init
+        let stream = "*a".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseStarExpr(stream, &state)
+        Assert.Equal([| Token.Eof(2ul, [| |]) |], rest)
+        Assert.Equal(Node.StarExpr(0ul, 2ul,
+                            Token.Mul(0ul, 1ul, [| |]),
+                            Node.Name(1ul, 2ul, Token.Name(1ul, 2ul, [| |], "a"))
                         ), node)
