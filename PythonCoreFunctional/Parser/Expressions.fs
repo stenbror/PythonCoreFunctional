@@ -441,3 +441,24 @@ module Expressions =
                                 ParseLambda(stream, false, &state)
                 |       _ ->
                                 ParseOrTest(stream, &state)
+
+         and ParseTest (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                match TryToken stream with
+                |       Some(Token.Lambda(_ , _ , _), _) ->
+                                ParseLambda(stream, true, &state)
+                |       _ ->
+                                let left, rest = ParseOrTest(stream, &state)
+                                match TryToken rest with
+                                |       Some(Token.If(_ , _ , _), rest2) ->
+                                                let op1 = List.head rest
+                                                let right, rest3 = ParseOrTest(rest2, &state)
+                                                match TryToken rest3 with
+                                                |       Some(Token.Else(_ , _ , _), rest4) ->
+                                                                let op2 = List.head rest3
+                                                                let next, rest5 = ParseTest(rest4, &state)
+                                                                Node.Test(spanStart, GetStartPosition rest5, left, op1, right, op2, next), rest5
+                                                | _ ->
+                                                        raise (SyntaxError(List.head rest3, "Expecting 'else' in test expression!", GetStartPosition rest3))
+                                | _ ->
+                                        left, rest
