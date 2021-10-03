@@ -16,9 +16,9 @@ type Node =
     |   LessEqual of uint32 * uint32 * Node * Token * Node 
     |   NotEqual of uint32 * uint32 * Node * Token * Node 
     |   In of uint32 * uint32 * Node * Token * Node 
-    |   NotIn of uint32 * uint32 * Node * Token * Node 
+    |   NotIn of uint32 * uint32 * Node * Token * Token * Node 
     |   Is of uint32 * uint32 * Node * Token * Node 
-    |   IsNot of uint32 * uint32 * Node * Token * Node 
+    |   IsNot of uint32 * uint32 * Node * Token * Token * Node 
     |   StarExpr of uint32 * uint32 * Token * Node
     |   OrExpr of uint32 * uint32 * Node * Token * Node 
     |   XorExpr of uint32 * uint32 * Node * Token * Node 

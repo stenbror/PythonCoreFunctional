@@ -317,3 +317,79 @@ module Expressions =
                                 Node.StarExpr(spanStart, GetStartPosition rest2, op, right), rest2
                 |       _ ->
                                 raise (SyntaxError(List.head stream, "Missing '*' in star expression!", spanStart))
+
+        and ParseComparison (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseOr(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.Less(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseOr(rest2, &state)
+                                        left <- Node.Less(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.LessEqual(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseOr(rest2, &state)
+                                        left <- Node.LessEqual(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.Equal(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseOr(rest2, &state)
+                                        left <- Node.Equal(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.GreaterEqual(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseOr(rest2, &state)
+                                        left <- Node.GreaterEqual(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.Greater(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseOr(rest2, &state)
+                                        left <- Node.Greater(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.NotEqual(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseOr(rest2, &state)
+                                        left <- Node.NotEqual(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.In(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseOr(rest2, &state)
+                                        left <- Node.In(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       Some(Token.Is(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        match TryToken rest2 with
+                                        |       Some(Token.Not(_ , _ , _), rest3) ->
+                                                        let op2 = List.head rest2
+                                                        let right, rest4 = ParseOr(rest3, &state)
+                                                        left <- Node.IsNot(spanStart, GetStartPosition rest4, left, op, op2, right)
+                                                        rest <- rest4
+                                        | _ ->
+                                                        let right, rest3 = ParseOr(rest2, &state)
+                                                        left <- Node.Is(spanStart, GetStartPosition rest3, left, op, right)
+                                                        rest <- rest3
+                                        true
+
+                        |       Some(Token.Not(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        match TryToken rest2 with
+                                        |       Some(Token.In(_ , _ , _), rest3) ->
+                                                        let op2 = List.head rest2
+                                                        let right, rest4 = ParseOr(rest3, &state)
+                                                        left <- Node.NotIn(spanStart, GetStartPosition rest4, left, op, op2, right)
+                                                        rest <- rest4
+                                        | _ ->
+                                                        let pos = GetStartPosition rest2
+                                                        raise (SyntaxError(List.head rest2, "Missing 'in' in 'not in' expression!", pos))
+                                        true
+                        |       _ ->    false
+                        do ()
+                left, rest
