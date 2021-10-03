@@ -403,3 +403,17 @@ module Expressions =
                                 Node.NotTest(spanStart, GetStartPosition rest2, op, right), rest2
                 |       _ ->
                                 ParseComparison(stream, &state)
+
+        and ParseAndTest (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseNotTest(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.And(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseNotTest(rest2, &state)
+                                        left <- Node.AndTest(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       _ ->    false
+                        do ()
+                left, rest
