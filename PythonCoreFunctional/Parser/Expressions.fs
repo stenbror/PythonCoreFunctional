@@ -442,7 +442,7 @@ module Expressions =
                 |       _ ->
                                 ParseOrTest(stream, &state)
 
-         and ParseTest (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+        and ParseTest (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
                 let spanStart = GetStartPosition stream
                 match TryToken stream with
                 |       Some(Token.Lambda(_ , _ , _), _) ->
@@ -462,3 +462,14 @@ module Expressions =
                                                         raise (SyntaxError(List.head rest3, "Expecting 'else' in test expression!", GetStartPosition rest3))
                                 | _ ->
                                         left, rest
+
+        and ParseNamedExpr (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let left, rest = ParseTest(stream, &state)
+                match TryToken rest with
+                |       Some(Token.ColonAssign(_ , _ , _), rest2) ->
+                                let op = List.head rest
+                                let right, rest3 = ParseTest(rest2, &state)
+                                Node.NamedExpr(spanStart, GetStartPosition rest3, left, op, right), rest3
+                |       _ ->
+                                left, rest
