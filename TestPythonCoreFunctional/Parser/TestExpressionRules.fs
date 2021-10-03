@@ -662,3 +662,30 @@ module TestParserExpressionRules =
                             Token.GreaterEqual(7ul, 9ul, [| Trivia.WhiteSpace(6ul, 7ul) |] ),
                             Node.Number(10ul, 11ul, Token.Number(10ul, 11ul, [| Trivia.WhiteSpace(9ul, 10ul) |], "6" ))
                         ), node)
+
+    [<Fact>]
+    let ``Test comparison rule with single equel operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 == 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseComparison(stream, &state)
+        Assert.Equal([| Token.Eof(6ul, [| |]) |], rest)
+        Assert.Equal(Node.Equal(0ul, 6ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.Equal(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(5ul, 6ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test comparison rule with multiple equal operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 == 5 == 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseComparison(stream, &state)
+        Assert.Equal([| Token.Eof(11ul, [| |]) |], rest)
+        Assert.Equal(Node.Equal(0ul, 11ul,
+                            Node.Equal(0ul, 7ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.Equal(2ul, 4ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(5ul, 7ul, Token.Number(5ul, 6ul, [| Trivia.WhiteSpace(4ul, 5ul) |], "5" )) ),
+                            Token.Equal(7ul, 9ul, [| Trivia.WhiteSpace(6ul, 7ul) |] ),
+                            Node.Number(10ul, 11ul, Token.Number(10ul, 11ul, [| Trivia.WhiteSpace(9ul, 10ul) |], "6" ))
+                        ), node)
