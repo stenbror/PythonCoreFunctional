@@ -433,7 +433,28 @@ module Expressions =
                 left, rest
 
         and ParseLambda (stream: TokenStream, isCond: bool, state: byref<ParseState>) : (Node * TokenStream) =
-                Node.Empty, stream
+                let spanStart = GetStartPosition stream
+                match TryToken stream with
+                |       Some(Token.Lambda(_ , _ , _), rest) ->
+                                let op = List.head stream
+                                let left, rest2 =       match TryToken rest with
+                                                        |       Some(Token.Colon(_ , _ , _), _) ->
+                                                                        Node.Empty, rest
+                                                        | _ ->
+                                                                        ParseVarArgsList(rest, &state)
+                                match TryToken rest2 with
+                                |       Some(Token.Colon(_ , _ , _), rest4) ->
+                                                let op2 = List.head rest2
+                                                let right, rest3 =      match isCond with
+                                                                        |       true ->
+                                                                                        ParseTest(rest4, &state)
+                                                                        | _ ->
+                                                                                        ParseTestNoCond(rest4, &state)
+                                                Node.Lambda(spanStart, GetStartPosition rest3, op, left, op2, right, isCond), rest3
+                                | _ ->
+                                        raise (SyntaxError(List.head stream, "Expecting ':' in 'lambda' expression!", GetStartPosition rest2))
+                | _ ->
+                        raise (SyntaxError(List.head stream, "Expecting 'lambda' expression!", GetStartPosition stream))
 
         and ParseTestNoCond (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
                 match TryToken stream with
@@ -473,3 +494,11 @@ module Expressions =
                                 Node.NamedExpr(spanStart, GetStartPosition rest3, left, op, right), rest3
                 |       _ ->
                                 left, rest
+
+
+
+
+
+
+        and ParseVarArgsList (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                Node.Empty, stream
