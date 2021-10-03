@@ -393,3 +393,13 @@ module Expressions =
                         |       _ ->    false
                         do ()
                 left, rest
+
+        and ParseNotTest (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                match   TryToken stream with
+                |       Some(Token.Not(_ , _ , _), rest) ->
+                                let op = List.head stream
+                                let right, rest2 = ParseNotTest(rest, &state)
+                                Node.NotTest(spanStart, GetStartPosition rest2, op, right), rest2
+                |       _ ->
+                                ParseComparison(stream, &state)
