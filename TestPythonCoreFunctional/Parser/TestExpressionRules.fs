@@ -431,3 +431,42 @@ module TestParserExpressionRules =
                             Node.Number(10ul, 11ul, Token.Number(10ul, 11ul, [| Trivia.WhiteSpace(9ul, 10ul) |], "6" ))
                         ), node)
 
+
+
+
+
+
+    [<Fact>]
+    let ``Test and rule without operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "True".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseAnd(stream, &state)
+        Assert.Equal([| Token.Eof(4ul, [| |]) |], rest)
+        Assert.Equal(Node.True(0ul, 4ul, Token.True(0ul, 4ul, [| |] )), node)
+
+    [<Fact>]
+    let ``Test and rule with single & operator``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 & 5".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseAnd(stream, &state)
+        Assert.Equal([| Token.Eof(5ul, [| |]) |], rest)
+        Assert.Equal(Node.AndExpr(0ul, 5ul, 
+                            Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                            Token.BitAnd(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                            Node.Number(4ul, 5ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" ))
+                        ), node)
+
+    [<Fact>]
+    let ``Test and rule with multiple & operators``() = 
+        let mutable state = ParseState.Init
+        let stream = "4 & 5 & 6".ToCharArray() |> Tokenizer.TokenizeFromCharArray
+        let node, rest = Expressions.ParseAnd(stream, &state)
+        Assert.Equal([| Token.Eof(9ul, [| |]) |], rest)
+        Assert.Equal(Node.AndExpr(0ul, 9ul,
+                            Node.AndExpr(0ul, 6ul, 
+                                Node.Number(0ul, 2ul, Token.Number(0ul, 1ul, [| |], "4" )),
+                                Token.BitAnd(2ul, 3ul, [| Trivia.WhiteSpace(1ul, 2ul) |] ),
+                                Node.Number(4ul, 6ul, Token.Number(4ul, 5ul, [| Trivia.WhiteSpace(3ul, 4ul) |], "5" )) ),
+                            Token.BitAnd(6ul, 7ul, [| Trivia.WhiteSpace(5ul, 6ul) |] ),
+                            Node.Number(8ul, 9ul, Token.Number(8ul, 9ul, [| Trivia.WhiteSpace(7ul, 8ul) |], "6" ))
+                        ), node)

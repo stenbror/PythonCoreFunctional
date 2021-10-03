@@ -307,3 +307,13 @@ module Expressions =
                         |       _ ->    false
                         do ()
                 left, rest
+
+        and ParseStarExpr (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                match   TryToken stream with
+                |       Some(Token.Mul(_ , _ , _), rest) ->
+                                let op = List.head stream
+                                let right, rest2 = ParseOr(rest, &state)
+                                Node.StarExpr(spanStart, GetStartPosition rest2, op, right), rest2
+                |       _ ->
+                                raise (SyntaxError(List.head stream, "Missing '*' in star expression!", spanStart))
