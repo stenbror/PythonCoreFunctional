@@ -265,3 +265,45 @@ module Expressions =
                         |       _ ->    false
                         do ()
                 left, rest
+
+        and ParseAnd (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseShift(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.BitAnd(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseShift(rest2, &state)
+                                        left <- Node.AndExpr(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       _ ->    false
+                        do ()
+                left, rest
+
+        and ParseXor (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseAnd(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.BitXor(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseAnd(rest2, &state)
+                                        left <- Node.XorExpr(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       _ ->    false
+                        do ()
+                left, rest
+
+        and ParseOr (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseXor(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.BitOr(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseXor(rest2, &state)
+                                        left <- Node.OrExpr(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       _ ->    false
+                        do ()
+                left, rest
