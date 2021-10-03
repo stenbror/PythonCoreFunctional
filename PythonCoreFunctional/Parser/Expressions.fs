@@ -435,4 +435,9 @@ module Expressions =
         and ParseLambda (stream: TokenStream, isCond: bool, state: byref<ParseState>) : (Node * TokenStream) =
                 Node.Empty, stream
 
-        
+        and ParseTestNoCond (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                match TryToken stream with
+                |       Some(Token.Lambda(_ , _ , _), _) ->
+                                ParseLambda(stream, false, &state)
+                |       _ ->
+                                ParseOrTest(stream, &state)
