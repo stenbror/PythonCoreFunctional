@@ -417,3 +417,22 @@ module Expressions =
                         |       _ ->    false
                         do ()
                 left, rest
+
+        and ParseOrTest (stream: TokenStream, state: byref<ParseState>) : (Node * TokenStream) =
+                let spanStart = GetStartPosition stream
+                let mutable left, rest = ParseAndTest(stream, &state)
+                while   match TryToken rest with
+                        |       Some(Token.Or(_ , _ , _), rest2) ->
+                                        let op = List.head rest
+                                        let right, rest3 = ParseAndTest(rest2, &state)
+                                        left <- Node.OrTest(spanStart, GetStartPosition rest3, left, op, right)
+                                        rest <- rest3
+                                        true
+                        |       _ ->    false
+                        do ()
+                left, rest
+
+        and ParseLambda (stream: TokenStream, isCond: bool, state: byref<ParseState>) : (Node * TokenStream) =
+                Node.Empty, stream
+
+        
